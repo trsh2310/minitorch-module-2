@@ -97,7 +97,7 @@ class Tensor:
         self.f = backend
 
     def requires_grad_(self, x: bool) -> None:
-        self.history = History()
+        self.history = History() if x else None
 
     def requires_grad(self) -> bool:
         return self.history is not None
@@ -183,7 +183,7 @@ class Tensor:
 
     def all(self, dim: Optional[int] = None) -> Tensor:
         if dim is None:
-            return All.apply(self.view(self.size), self._ensure_tensor(0))
+            return All.apply(self.contiguous().view(self.size), self._ensure_tensor(0))
         else:
             return All.apply(self, self._ensure_tensor(dim))
 
@@ -222,11 +222,11 @@ class Tensor:
 
     def permute(self, *order: int) -> Tensor:
         "Permute tensor dimensions to *order"
-        return Permute.apply(self, tensor(list(order)))
+        return Permute.apply(self, tensor(list(order), backend=self.backend))
 
     def view(self, *shape: int) -> Tensor:
         "Change the shape of the tensor to a new shape with the same size"
-        return View.apply(self, tensor(list(shape)))
+        return View.apply(self, tensor(list(shape), backend=self.backend))
 
     def contiguous(self) -> Tensor:
         "Return a contiguous tensor with the same data"
